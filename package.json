@@ -1,0 +1,15 @@
+{
+  "name": "afribuild-marketplace",
+  "version": "1.0.0",
+  "description": "Africa's Construction & Real Estate Ecosystem Marketplace",
+  "scripts": {
+    "start": "python3 -m http.server 3000",
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed",
+    "test:ui": "npx playwright test --ui",
+    "test:debug": "npx playwright test --debug"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0"
+  }
+}
