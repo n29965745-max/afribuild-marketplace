@@ -11,12 +11,12 @@ test.describe('Dashboard - The Vault', () => {
 
   test('should display portfolio overview', async ({ page }) => {
     await expect(page.locator('#page-dashboard')).toBeVisible();
-    await expect(page.locator('#page-dashboard:has-text("$2,840,500")')).toBeVisible();
+    await expect(page.locator('#page-dashboard:has-text("₦2,840,500")')).toBeVisible();
   });
 
   test('should display portfolio breakdown', async ({ page }) => {
     await expect(page.locator('#page-dashboard:has-text("Liquid Assets")')).toBeVisible();
-    await expect(page.locator('#page-dashboard:has-text("$420k")')).toBeVisible();
+    await expect(page.locator('#page-dashboard:has-text("₦420k")')).toBeVisible();
   });
 
   test('should display quick actions', async ({ page }) => {

@@ -17,7 +17,7 @@ test.describe('Admin Dashboard', () => {
   test('should display metric cards', async ({ page }) => {
     await expect(page.locator('#page-admin:has-text("Total Users")')).toBeVisible();
     await expect(page.locator('#page-admin:has-text("24,892")')).toBeVisible();
-    await expect(page.locator('#page-admin:has-text("$1.2M")')).toBeVisible();
+    await expect(page.locator('#page-admin:has-text("₦1.2M")')).toBeVisible();
   });
 
   test('should display approvals queue', async ({ page }) => {

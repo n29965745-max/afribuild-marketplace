@@ -27,7 +27,7 @@ test.describe('Equipment Hire', () => {
 
   test('should display daily rates', async ({ page }) => {
     await goToPage(page, 'equipment');
-    await expect(page.locator('#page-equipment:has-text("$350/day")')).toBeVisible();
+    await expect(page.locator('#page-equipment:has-text("₦350/day")')).toBeVisible();
   });
 
   test('should display availability badges', async ({ page }) => {

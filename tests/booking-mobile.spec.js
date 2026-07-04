@@ -1,10 +1,10 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
-const BASE = 'https://afribuild-azure.vercel.app';
+const BASE = 'http://localhost:5001';
 
 async function goToPage(page, hashRoute) {
-  await page.goto(BASE, { waitUntil: 'networkidle', timeout: 60000 });
+  await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 });
   await page.waitForTimeout(2000);
   await page.evaluate((route) => { window.location.hash = '/' + route; }, hashRoute);
   await page.waitForTimeout(1500);

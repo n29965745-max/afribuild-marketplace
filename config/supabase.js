@@ -1,70 +1,63 @@
 /**
  * AfriBuild Marketplace - Supabase Client Configuration
- * 
  * Initialize and configure the Supabase client for the marketplace.
  * Uses Supabase JS v2 syntax.
  */
 
-// Supabase configuration constants
 const SUPABASE_CONFIG = {
-  // Replace these with your actual Supabase project credentials
   url: 'https://your-project-id.supabase.co',
   anonKey: 'your-anon-key-here',
-  
-  // Optional: Custom options
   options: {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true
     },
-    db: {
-      schema: 'public'
-    },
+    db: { schema: 'public' },
     global: {
-      headers: {
-        'x-application-name': 'afribuild-marketplace'
-      }
+      headers: { 'x-application-name': 'afribuild-marketplace' }
     }
   }
 };
 
-/**
- * Initialize Supabase client
- * @returns {Object} Supabase client instance
- */
 function createSupabaseClient() {
-  // Check if Supabase is loaded
   if (typeof supabase === 'undefined' || !supabase.createClient) {
-    console.error('Supabase JS library not loaded. Include the Supabase CDN script.');
     return null;
   }
-
   try {
-    const client = supabase.createClient(
+    return supabase.createClient(
       SUPABASE_CONFIG.url,
       SUPABASE_CONFIG.anonKey,
       SUPABASE_CONFIG.options
     );
-    
-    console.log('Supabase client initialized successfully');
-    return client;
   } catch (error) {
     console.error('Failed to initialize Supabase client:', error.message);
     return null;
   }
 }
 
-// Create and export the singleton client instance
-const supabaseClient = createSupabaseClient();
+// Try immediately, then retry on DOMContentLoaded if CDN hasn't loaded yet
+let supabaseClient = createSupabaseClient();
 
-// Export for use in other modules
-if (typeof window !== 'undefined') {
-  window.SUPABASE_CONFIG = SUPABASE_CONFIG;
-  window.supabaseClient = supabaseClient;
+function initWhenReady() {
+  if (!supabaseClient) {
+    supabaseClient = createSupabaseClient();
+    if (supabaseClient) {
+      window.supabaseClient = supabaseClient;
+    }
+  }
 }
 
-// Common database table names
+if (!supabaseClient) {
+  document.addEventListener('DOMContentLoaded', initWhenReady);
+  // Also retry after a short delay for async CDN
+  setTimeout(initWhenReady, 500);
+  setTimeout(initWhenReady, 1500);
+}
+
+window.SUPABASE_CONFIG = SUPABASE_CONFIG;
+window.supabaseClient = supabaseClient;
+
 const TABLES = {
   PROPERTIES: 'properties',
   MATERIALS: 'materials',
@@ -87,11 +80,9 @@ const TABLES = {
   USER_FAVORITES: 'user_favorites',
   USER_PROJECTS: 'user_projects',
   CART_ITEMS: 'cart_items',
-  NOTIFICATIONS: 'notifications',
-  ANALYTICS: 'analytics'
+  NOTIFICATIONS: 'notifications'
 };
 
-// Storage bucket names
 const STORAGE_BUCKETS = {
   AVATARS: 'avatars',
   PROPERTIES: 'properties',
@@ -102,8 +93,5 @@ const STORAGE_BUCKETS = {
   TEMP: 'temp-uploads'
 };
 
-// Export constants
-if (typeof window !== 'undefined') {
-  window.TABLES = TABLES;
-  window.STORAGE_BUCKETS = STORAGE_BUCKETS;
-}
+window.TABLES = TABLES;
+window.STORAGE_BUCKETS = STORAGE_BUCKETS;
