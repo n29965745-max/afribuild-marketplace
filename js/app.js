@@ -15,7 +15,15 @@ const DB = {
   init() {
     this.client = window.supabaseClient;
     if (!this.client) {
-      console.error('Supabase client not initialized. Check config/supabase.js');
+      // Retry polling for async CDN loading
+      let attempts = 0;
+      const poll = setInterval(() => {
+        attempts++;
+        this.client = window.supabaseClient;
+        if (this.client || attempts >= 20) {
+          clearInterval(poll);
+        }
+      }, 300);
     }
     return this.client;
   },
