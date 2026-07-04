@@ -775,6 +775,7 @@ const Properties = {
   async render() {
     const grid = document.getElementById('property-grid');
     if (!grid) return;
+    if (!DB.client) { setTimeout(() => this.render(), 500); return; }
     grid.innerHTML = '<div class="col-span-2 text-center py-8 text-gray-400"><span class="material-symbols-outlined animate-spin text-3xl">autorenew</span><p class="mt-2 text-sm">Loading properties...</p></div>';
 
     const { data } = await DB.fetch(TABLES.PROPERTIES, {
@@ -956,6 +957,7 @@ const Materials = {
   async render() {
     const container = document.querySelector('#page-materials .flex.overflow-x-auto.gap-4.hide-scrollbar.pb-2');
     if (!container) return;
+    if (!DB.client) { setTimeout(() => this.render(), 500); return; }
 
     const { data } = await DB.fetch(TABLES.MATERIALS, {
       orderBy: ['created_at', false],
@@ -1153,6 +1155,7 @@ const Professionals = {
   async render() {
     const container = document.querySelector('#page-professionals .grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3');
     if (!container) return;
+    if (!DB.client) { setTimeout(() => this.render(), 500); return; }
 
     const { data } = await DB.fetch(TABLES.PROFESSIONALS, {
       orderBy: ['rating', false],
@@ -1270,6 +1273,7 @@ const Equipment = {
   async render() {
     const container = document.querySelector('#page-equipment .grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3');
     if (!container) return;
+    if (!DB.client) { setTimeout(() => this.render(), 500); return; }
 
     const { data } = await DB.fetch(TABLES.EQUIPMENT, {
       orderBy: ['created_at', false],
@@ -1604,6 +1608,7 @@ const Blog = {
   async render() {
     const container = document.querySelector('#page-blog .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3');
     if (!container) return;
+    if (!DB.client) { setTimeout(() => this.render(), 500); return; }
 
     const { data } = await DB.fetch(TABLES.BLOG_POSTS, {
       where: { published: true },
