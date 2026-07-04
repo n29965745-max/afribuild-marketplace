@@ -30,35 +30,36 @@ function createSupabaseClient() {
       SUPABASE_CONFIG.anonKey,
       SUPABASE_CONFIG.options
     );
-  } catch (error) {
-    console.error('Failed to initialize Supabase client:', error.message);
+  } catch (e) {
     return null;
   }
 }
 
-// Try immediately, then retry on DOMContentLoaded if CDN hasn't loaded yet
-let supabaseClient = createSupabaseClient();
+// Export config immediately
+window.SUPABASE_CONFIG = SUPABASE_CONFIG;
 
-function initWhenReady() {
-  if (!supabaseClient) {
+// Try to create client immediately
+let supabaseClient = createSupabaseClient();
+window.supabaseClient = supabaseClient;
+
+// Poll for Supabase CDN availability (async script may load after defer)
+if (!supabaseClient) {
+  let attempts = 0;
+  const maxAttempts = 20;
+  const poll = setInterval(function() {
+    attempts++;
     supabaseClient = createSupabaseClient();
     if (supabaseClient) {
       window.supabaseClient = supabaseClient;
+      clearInterval(poll);
+    } else if (attempts >= maxAttempts) {
+      clearInterval(poll);
+      console.warn('Supabase CDN did not load after ' + maxAttempts + ' attempts');
     }
-  }
+  }, 300);
 }
 
-if (!supabaseClient) {
-  document.addEventListener('DOMContentLoaded', initWhenReady);
-  // Also retry after a short delay for async CDN
-  setTimeout(initWhenReady, 500);
-  setTimeout(initWhenReady, 1500);
-}
-
-window.SUPABASE_CONFIG = SUPABASE_CONFIG;
-window.supabaseClient = supabaseClient;
-
-const TABLES = {
+var TABLES = {
   PROPERTIES: 'properties',
   MATERIALS: 'materials',
   MATERIAL_CATEGORIES: 'material_categories',
@@ -83,7 +84,7 @@ const TABLES = {
   NOTIFICATIONS: 'notifications'
 };
 
-const STORAGE_BUCKETS = {
+var STORAGE_BUCKETS = {
   AVATARS: 'avatars',
   PROPERTIES: 'properties',
   MATERIALS: 'materials',
