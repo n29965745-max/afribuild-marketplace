@@ -775,14 +775,25 @@ const Properties = {
   async render() {
     const grid = document.getElementById('property-grid');
     if (!grid) return;
-    if (!DB.client) { setTimeout(() => this.render(), 500); return; }
+    if (!DB.client) {
+      if (!this._retryCount) this._retryCount = 0;
+      this._retryCount++;
+      if (this._retryCount < 20) setTimeout(() => this.render(), 500);
+      return;
+    }
+    this._retryCount = 0;
     grid.innerHTML = '<div class="col-span-2 text-center py-8 text-gray-400"><span class="material-symbols-outlined animate-spin text-3xl">autorenew</span><p class="mt-2 text-sm">Loading properties...</p></div>';
 
-    const { data } = await DB.fetch(TABLES.PROPERTIES, {
+    const { data, error } = await DB.fetch(TABLES.PROPERTIES, {
       where: { status: 'active' },
       orderBy: ['created_at', false],
       limit: 20
     });
+
+    if (error) {
+      grid.innerHTML = '<div class="col-span-2 text-center py-12 text-gray-400"><span class="material-symbols-outlined text-4xl">cloud_off</span><p class="mt-2 font-bold">Unable to load properties</p><p class="text-sm mt-1 mb-4">Check your connection and try again</p><button onclick="Properties.render()" class="bg-primary text-white px-6 py-2 rounded-lg font-bold text-sm">Retry</button></div>';
+      return;
+    }
 
     if (!data || data.length === 0) {
       grid.innerHTML = '<div class="col-span-2 text-center py-12 text-gray-400"><span class="material-symbols-outlined text-4xl">apartment</span><p class="mt-2">No properties available yet</p></div>';
