@@ -5,8 +5,8 @@
  */
 
 const SUPABASE_CONFIG = {
-  url: 'https://your-project-id.supabase.co',
-  anonKey: 'your-anon-key-here',
+  url: 'https://xobkowupqahpoxybjuvg.supabase.co',
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvYmtvd3VwcWFocG94eWJqdXZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwNjY0OTQsImV4cCI6MjA5ODY0MjQ5NH0.mZEE32J6p2jn00V-aIv-mjgtvrAKX5ELSMUjUmV0Q5k',
   options: {
     auth: {
       autoRefreshToken: true,
