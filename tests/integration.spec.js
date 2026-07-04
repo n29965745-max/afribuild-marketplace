@@ -104,16 +104,16 @@ test.describe('Full User Flow Integration', () => {
     await page.evaluate(() => { window.location.hash = '/properties'; });
     await page.waitForTimeout(1000);
 
-    const buyHomes = page.locator('button:has-text("Buy Homes")');
-    const buyLand = page.locator('button:has-text("Buy Land")');
+    const homesBtn = page.locator('#property-filters button:has-text("Homes")');
+    const allBtn = page.locator('#property-filters button:has-text("All")');
 
-    await buyHomes.click();
-    await expect(buyHomes).toHaveClass(/active-filter/);
-    await expect(buyLand).not.toHaveClass(/active-filter/);
+    await homesBtn.click();
+    await expect(homesBtn).toHaveClass(/active-filter/);
+    await expect(allBtn).not.toHaveClass(/active-filter/);
 
-    await buyLand.click();
-    await expect(buyLand).toHaveClass(/active-filter/);
-    await expect(buyHomes).not.toHaveClass(/active-filter/);
+    await allBtn.click();
+    await expect(allBtn).toHaveClass(/active-filter/);
+    await expect(homesBtn).not.toHaveClass(/active-filter/);
   });
 
   test('professional filter chips toggle', async ({ page }) => {

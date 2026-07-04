@@ -14,14 +14,14 @@ test.describe('Properties Page', () => {
   });
 
   test('should display filter chips', async ({ page }) => {
-    await expect(page.locator('button:has-text("Buy Land")')).toBeVisible();
-    await expect(page.locator('button:has-text("Buy Homes")')).toBeVisible();
+    await expect(page.locator('#property-filters button:has-text("All")')).toBeVisible();
+    await expect(page.locator('#property-filters button:has-text("Homes")')).toBeVisible();
   });
 
   test('should toggle filter chips', async ({ page }) => {
-    const buyHomesBtn = page.locator('button:has-text("Buy Homes")');
-    await buyHomesBtn.click();
-    await expect(buyHomesBtn).toHaveClass(/active-filter/);
+    const homesBtn = page.locator('#property-filters button:has-text("Homes")');
+    await homesBtn.click();
+    await expect(homesBtn).toHaveClass(/active-filter/);
   });
 
   test('should display featured properties', async ({ page }) => {

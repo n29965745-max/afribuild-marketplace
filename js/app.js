@@ -781,7 +781,7 @@ const Properties = {
     const { data } = await DB.fetch(TABLES.PROPERTIES, {
       where: { status: 'active' },
       orderBy: ['created_at', false],
-      limit: 12
+      limit: 20
     });
 
     if (!data || data.length === 0) {
@@ -789,23 +789,67 @@ const Properties = {
       return;
     }
 
-    const placeholderImages = [
-      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop',
-      'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop'
-    ];
+    grid.innerHTML = data.map((p, i) => this._renderCard(p, i)).join('');
+  },
 
-    grid.innerHTML = data.map((p, i) => {
-      const img = (p.images && p.images.length > 0) ? p.images[0] : placeholderImages[i % placeholderImages.length];
-      const price = UI.formatCurrency(p.price);
-      const beds = p.bedrooms ? `<span class="text-xs flex items-center gap-1"><span class="material-symbols-outlined text-sm">bed</span>${p.bedrooms} Beds</span>` : '';
-      const baths = p.bathrooms ? `<span class="text-xs flex items-center gap-1"><span class="material-symbols-outlined text-sm">bathtub</span>${p.bathrooms} Baths</span>` : '';
-      const sqm = p.sqm ? `<span class="text-xs flex items-center gap-1"><span class="material-symbols-outlined text-sm">straighten</span>${p.sqm} sqm</span>` : '';
-      return `<div class="bg-white rounded-xl overflow-hidden premium-card-shadow border border-outline-variant tap-active"><div class="h-56 relative"><img class="w-full h-full object-cover" src="${img}" alt="${p.title}"/><div class="absolute top-4 left-4 bg-secondary-container text-yellow-800 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 uppercase"><span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1">verified</span>Verified</div></div><div class="p-4"><div class="flex justify-between items-start"><h3 class="font-bold text-lg leading-tight">${p.title}</h3><button class="material-symbols-outlined text-gray-400 hover:text-red-500 transition-colors favorite-btn">favorite</button></div><p class="text-gray-500 text-xs flex items-center gap-1"><span class="material-symbols-outlined text-xs">location_on</span>${p.location}</p><div class="flex items-center gap-4 mt-2 pb-2 border-b border-gray-100">${beds}${baths}${sqm}</div><div class="flex justify-between items-center mt-3"><p class="font-bold text-xl">${price}</p><button class="bg-primary text-white px-4 py-2 rounded text-sm font-bold" onclick="showToast('Property details coming soon!')">Details</button></div></div></div>`;
-    }).join('');
+  _placeholderImages: [
+    'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=300&fit=crop',
+    'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=400&h=300&fit=crop',
+    'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=400&h=300&fit=crop',
+    'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400&h=300&fit=crop',
+    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop',
+    'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop'
+  ],
+
+  _renderCard(p, i) {
+    const imgs = this._placeholderImages;
+    const img = (p.images && p.images.length > 0) ? p.images[0] : imgs[i % imgs.length];
+    const price = UI.formatCurrency(p.price);
+    const beds = p.bedrooms ? `<span class="text-xs flex items-center gap-1"><span class="material-symbols-outlined text-sm">bed</span>${p.bedrooms} Beds</span>` : '';
+    const baths = p.bathrooms ? `<span class="text-xs flex items-center gap-1"><span class="material-symbols-outlined text-sm">bathtub</span>${p.bathrooms} Baths</span>` : '';
+    const sqm = p.sqm ? `<span class="text-xs flex items-center gap-1"><span class="material-symbols-outlined text-sm">straighten</span>${p.sqm} sqm</span>` : '';
+    return `<div class="bg-white rounded-xl overflow-hidden premium-card-shadow border border-outline-variant tap-active"><div class="h-56 relative"><img class="w-full h-full object-cover" src="${img}" alt="${p.title}"/><div class="absolute top-4 left-4 bg-secondary-container text-yellow-800 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 uppercase"><span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1">verified</span>Verified</div></div><div class="p-4"><div class="flex justify-between items-start"><h3 class="font-bold text-lg leading-tight">${p.title}</h3><button class="material-symbols-outlined text-gray-400 hover:text-red-500 transition-colors favorite-btn">favorite</button></div><p class="text-gray-500 text-xs flex items-center gap-1"><span class="material-symbols-outlined text-xs">location_on</span>${p.location}</p><div class="flex items-center gap-4 mt-2 pb-2 border-b border-gray-100">${beds}${baths}${sqm}</div><div class="flex justify-between items-center mt-3"><p class="font-bold text-xl">${price}</p><button class="bg-primary text-white px-4 py-2 rounded text-sm font-bold" onclick="showToast('Property details coming soon!')">Details</button></div></div></div>`;
+  },
+
+  async renderFiltered(query, type) {
+    const grid = document.getElementById('property-grid');
+    if (!grid) return;
+    if (!DB.client) { setTimeout(() => this.renderFiltered(query, type), 500); return; }
+
+    grid.innerHTML = '<div class="col-span-2 text-center py-8 text-gray-400"><span class="material-symbols-outlined animate-spin text-3xl">autorenew</span><p class="mt-2 text-sm">Searching...</p></div>';
+
+    let props = [];
+    const hasQuery = query && query.trim().length > 0;
+    const hasType = type && type !== 'all';
+
+    if (hasQuery) {
+      // Search across title, location, description using ilike
+      const q = `%${query.trim()}%`;
+      const { data } = await DB.client
+        .from(TABLES.PROPERTIES)
+        .select('*')
+        .eq('status', 'active')
+        .or(`title.ilike.${q},location.ilike.${q},description.ilike.${q}`)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      props = data || [];
+    } else {
+      const filters = { where: { status: 'active' }, orderBy: ['created_at', false], limit: 20 };
+      const { data } = await DB.fetch(TABLES.PROPERTIES, filters);
+      props = data || [];
+    }
+
+    // Apply type filter client-side
+    if (hasType) {
+      props = props.filter(p => p.property_type === type);
+    }
+
+    if (props.length === 0) {
+      grid.innerHTML = '<div class="col-span-2 text-center py-12 text-gray-400"><span class="material-symbols-outlined text-4xl">search_off</span><p class="mt-2 font-bold">No properties found</p><p class="text-sm mt-1">Try adjusting your search or filters</p></div>';
+      return;
+    }
+
+    grid.innerHTML = props.map((p, i) => this._renderCard(p, i)).join('');
   },
 
   async uploadImages(propertyId, files) {
