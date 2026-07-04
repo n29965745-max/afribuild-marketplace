@@ -5,7 +5,7 @@ const BASE = 'https://afribuild-azure.vercel.app';
 
 test.describe('Vercel Live Site Visual Tests', () => {
   test('homepage loads and screenshot', async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'networkidle', timeout: 60000 });
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(3000);
     await page.screenshot({ path: 'test-results/vercel-home.png', fullPage: false });
     const title = await page.title();
@@ -16,7 +16,7 @@ test.describe('Vercel Live Site Visual Tests', () => {
   });
 
   test('properties page loads', async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'networkidle', timeout: 60000 });
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(2000);
     await page.evaluate(() => { window.location.hash = '/properties'; });
     await page.waitForTimeout(1500);
@@ -26,7 +26,7 @@ test.describe('Vercel Live Site Visual Tests', () => {
   });
 
   test('materials page loads', async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'networkidle', timeout: 60000 });
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(2000);
     await page.evaluate(() => { window.location.hash = '/materials'; });
     await page.waitForTimeout(1500);
@@ -36,7 +36,7 @@ test.describe('Vercel Live Site Visual Tests', () => {
   });
 
   test('build wizard loads', async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'networkidle', timeout: 60000 });
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(2000);
     await page.evaluate(() => { window.location.hash = '/build'; });
     await page.waitForTimeout(1500);
@@ -46,7 +46,7 @@ test.describe('Vercel Live Site Visual Tests', () => {
   });
 
   test('dashboard loads', async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'networkidle', timeout: 60000 });
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(2000);
     await page.evaluate(() => { window.location.hash = '/dashboard'; });
     await page.waitForTimeout(1500);
@@ -56,7 +56,7 @@ test.describe('Vercel Live Site Visual Tests', () => {
   });
 
   test('professionals loads', async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'networkidle', timeout: 60000 });
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(2000);
     await page.evaluate(() => { window.location.hash = '/professionals'; });
     await page.waitForTimeout(1500);
@@ -68,7 +68,7 @@ test.describe('Vercel Live Site Visual Tests', () => {
   test('check for console errors', async ({ page }) => {
     const errors = [];
     page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
-    await page.goto(BASE, { waitUntil: 'networkidle', timeout: 60000 });
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(3000);
     // Navigate through all pages
     const routes = ['properties','materials','build','professionals','contractors','equipment','transport','financing','blog','dashboard','admin','approval','request-quote','contact'];
@@ -83,7 +83,7 @@ test.describe('Vercel Live Site Visual Tests', () => {
   });
 
   test('check bottom nav is visible', async ({ page }) => {
-    await page.goto(BASE, { waitUntil: 'networkidle', timeout: 60000 });
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(3000);
     const bottomNav = await page.locator('#bottom-nav').isVisible();
     console.log('Bottom nav visible:', bottomNav);
