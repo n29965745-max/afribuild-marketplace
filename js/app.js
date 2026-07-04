@@ -772,6 +772,41 @@ const Properties = {
     });
   },
 
+  async render() {
+    const grid = document.getElementById('property-grid');
+    if (!grid) return;
+    grid.innerHTML = '<div class="col-span-2 text-center py-8 text-gray-400"><span class="material-symbols-outlined animate-spin text-3xl">autorenew</span><p class="mt-2 text-sm">Loading properties...</p></div>';
+
+    const { data } = await DB.fetch(TABLES.PROPERTIES, {
+      where: { status: 'active' },
+      orderBy: ['created_at', false],
+      limit: 12
+    });
+
+    if (!data || data.length === 0) {
+      grid.innerHTML = '<div class="col-span-2 text-center py-12 text-gray-400"><span class="material-symbols-outlined text-4xl">apartment</span><p class="mt-2">No properties available yet</p></div>';
+      return;
+    }
+
+    const placeholderImages = [
+      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop'
+    ];
+
+    grid.innerHTML = data.map((p, i) => {
+      const img = (p.images && p.images.length > 0) ? p.images[0] : placeholderImages[i % placeholderImages.length];
+      const price = UI.formatCurrency(p.price);
+      const beds = p.bedrooms ? `<span class="text-xs flex items-center gap-1"><span class="material-symbols-outlined text-sm">bed</span>${p.bedrooms} Beds</span>` : '';
+      const baths = p.bathrooms ? `<span class="text-xs flex items-center gap-1"><span class="material-symbols-outlined text-sm">bathtub</span>${p.bathrooms} Baths</span>` : '';
+      const sqm = p.sqm ? `<span class="text-xs flex items-center gap-1"><span class="material-symbols-outlined text-sm">straighten</span>${p.sqm} sqm</span>` : '';
+      return `<div class="bg-white rounded-xl overflow-hidden premium-card-shadow border border-outline-variant tap-active"><div class="h-56 relative"><img class="w-full h-full object-cover" src="${img}" alt="${p.title}"/><div class="absolute top-4 left-4 bg-secondary-container text-yellow-800 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 uppercase"><span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1">verified</span>Verified</div></div><div class="p-4"><div class="flex justify-between items-start"><h3 class="font-bold text-lg leading-tight">${p.title}</h3><button class="material-symbols-outlined text-gray-400 hover:text-red-500 transition-colors favorite-btn">favorite</button></div><p class="text-gray-500 text-xs flex items-center gap-1"><span class="material-symbols-outlined text-xs">location_on</span>${p.location}</p><div class="flex items-center gap-4 mt-2 pb-2 border-b border-gray-100">${beds}${baths}${sqm}</div><div class="flex justify-between items-center mt-3"><p class="font-bold text-xl">${price}</p><button class="bg-primary text-white px-4 py-2 rounded text-sm font-bold" onclick="showToast('Property details coming soon!')">Details</button></div></div></div>`;
+    }).join('');
+  },
+
   async uploadImages(propertyId, files) {
     const results = [];
 
@@ -916,6 +951,34 @@ const Materials = {
     return DB.fetch(TABLES.MATERIAL_CATEGORIES, {
       orderBy: ['name', true]
     });
+  },
+
+  async render() {
+    const container = document.querySelector('#page-materials .flex.overflow-x-auto.gap-4.hide-scrollbar.pb-2');
+    if (!container) return;
+
+    const { data } = await DB.fetch(TABLES.MATERIALS, {
+      orderBy: ['created_at', false],
+      limit: 10
+    });
+
+    if (!data || data.length === 0) return;
+
+    const placeholderImages = [
+      'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=300&h=200&fit=crop',
+      'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=300&h=200&fit=crop',
+      'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=300&h=200&fit=crop',
+      'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=300&h=200&fit=crop'
+    ];
+
+    const categoryIcons = { foundation: 'foundation', structural: 'architecture', roofing: 'roofing', plumbing: 'plumbing', electrical: 'bolt', hvac: 'air', finishes: 'format_paint', masonry: 'construction', doors_windows: 'door_sliding', external: 'yard', safety: 'health_and_safety' };
+
+    container.innerHTML = data.map((m, i) => {
+      const img = (m.images && m.images.length > 0) ? m.images[0] : placeholderImages[i % placeholderImages.length];
+      const price = UI.formatCurrency(m.price);
+      const catIcon = categoryIcons[m.category] || 'inventory_2';
+      return `<div class="flex-shrink-0 w-64 glass-card rounded-xl overflow-hidden shadow-sm border border-outline-variant btn-hover"><div class="h-40 w-full bg-surface-container-highest relative"><img class="w-full h-full object-cover" src="${img}" alt="${m.name}"/><span class="absolute top-2 left-2 bg-secondary text-white text-xs px-2 py-1 rounded font-bold">${m.category ? m.category.toUpperCase() : 'PREMIUM'}</span></div><div class="p-4"><div class="flex items-center justify-between mb-1"><span class="text-gray-400 text-[10px] tracking-wider font-bold">${m.supplier_id ? 'VERIFIED SUPPLIER' : 'MARKETPLACE'}</span><div class="flex items-center text-secondary"><span class="material-symbols-outlined text-sm">star</span><span class="text-xs ml-1 font-bold">4.${8 + (i % 2)}</span></div></div><h5 class="text-sm font-bold truncate">${m.name}</h5><div class="flex items-center justify-between mt-4"><span class="font-bold text-lg">${price}</span><button class="bg-primary text-white p-2 rounded-lg" onclick="showToast('Added to cart!')"><span class="material-symbols-outlined">add_shopping_cart</span></button></div></div></div>`;
+    }).join('');
   }
 };
 
@@ -1085,6 +1148,38 @@ const Professionals = {
 
     const specialties = [...new Set(data.map(p => p.specialty))];
     return { data: specialties, error: null };
+  },
+
+  async render() {
+    const container = document.querySelector('#page-professionals .grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3');
+    if (!container) return;
+
+    const { data } = await DB.fetch(TABLES.PROFESSIONALS, {
+      orderBy: ['rating', false],
+      limit: 12
+    });
+
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div class="col-span-3 text-center py-12 text-gray-400"><span class="material-symbols-outlined text-4xl">engineering</span><p class="mt-2">No professionals listed yet</p></div>';
+      return;
+    }
+
+    const placeholderImages = [
+      'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=300&fit=crop'
+    ];
+
+    const professionLabels = { architect: 'Lead Architect', engineer: 'Structural Engineer', quantity_surveyor: 'Quantity Surveyor', interior_designer: 'Interior Designer', landscape_designer: 'Landscape Designer', project_manager: 'Project Manager', surveyor: 'Surveyor' };
+
+    container.innerHTML = data.map((p, i) => {
+      const img = placeholderImages[i % placeholderImages.length];
+      const label = professionLabels[p.profession] || p.profession;
+      const rating = p.rating ? p.rating.toFixed(1) : '4.8';
+      return `<article class="bg-white rounded-xl border border-outline-variant overflow-hidden flex flex-col premium-card-shadow profile-card-hover transition-all duration-300"><div class="relative h-48 overflow-hidden"><img class="w-full h-full object-cover" src="${img}" alt="${p.company_name || label}"/><div class="absolute top-4 right-4 verified-badge text-[10px] text-white font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-md"><span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1">new_releases</span>VERIFIED</div></div><div class="p-6 flex-grow"><div class="flex justify-between items-start mb-1"><div><h3 class="text-lg font-bold">${p.company_name || 'Professional'}</h3><p class="text-secondary font-bold text-sm">${label}</p></div><div class="flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded"><span class="material-symbols-outlined text-secondary-container text-base" style="font-variation-settings:'FILL' 1">star</span><span class="text-sm font-bold">${rating}</span></div></div><p class="text-sm text-gray-500 line-clamp-2 mb-4">${p.bio || 'Verified professional on AfriBuild.'}</p><button class="w-full bg-primary text-white py-3 rounded-lg font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 transition-all group" onclick="showToast('Quote request sent!')">Request Quote<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span></button></div></article>`;
+    }).join('') + `<article class="bg-surface-container rounded-xl border-2 border-dashed border-outline-variant overflow-hidden flex flex-col justify-center items-center p-8 text-center group cursor-pointer hover:bg-surface-container-high transition-all"><div class="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform"><span class="material-symbols-outlined text-3xl">add_business</span></div><h3 class="text-lg font-bold mb-2" style="font-family:Montserrat">Join the Directory</h3><p class="text-gray-500 text-sm mb-4">Qualified professionals can list their services today.</p><button class="text-secondary font-bold text-sm hover:underline" onclick="showToast('Application form coming soon!')">Apply for Verification</button></article>`;
   }
 };
 
@@ -1170,6 +1265,38 @@ const Equipment = {
       where: { owner_id: ownerId },
       orderBy: ['created_at', false]
     });
+  },
+
+  async render() {
+    const container = document.querySelector('#page-equipment .grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3');
+    if (!container) return;
+
+    const { data } = await DB.fetch(TABLES.EQUIPMENT, {
+      orderBy: ['created_at', false],
+      limit: 9
+    });
+
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div class="col-span-3 text-center py-12 text-gray-400"><span class="material-symbols-outlined text-4xl">precision_manufacturing</span><p class="mt-2">No equipment available yet</p></div>';
+      return;
+    }
+
+    const placeholderImages = [
+      'https://images.unsplash.com/photo-1572981779307-484184f04def?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1580901368919-7738efb0f87e?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1565008447742-97f6f38c985c?w=400&h=300&fit=crop'
+    ];
+
+    container.innerHTML = data.map((e, i) => {
+      const img = (e.images && e.images.length > 0) ? e.images[0] : placeholderImages[i % placeholderImages.length];
+      const price = UI.formatCurrency(e.daily_rate);
+      const statusClass = e.available ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
+      const statusText = e.available ? 'Available' : 'Booked';
+      const btnClass = e.available ? 'bg-primary text-white px-4 py-2 rounded text-sm font-bold' : 'bg-gray-300 text-gray-500 px-4 py-2 rounded text-sm font-bold cursor-not-allowed';
+      const btnText = e.available ? 'Book Now' : 'Unavailable';
+      const operatorBadge = e.operator_included ? '<span class="text-xs bg-green-50 text-green-700 px-2 py-1 rounded font-bold">+ Operator</span>' : '<span class="text-xs bg-surface-container px-2 py-1 rounded font-bold">Self-Drive</span>';
+      return `<div class="bg-white rounded-xl overflow-hidden premium-card-shadow border border-outline-variant"><div class="h-48"><img class="w-full h-full object-cover" src="${img}" alt="${e.name}"/></div><div class="p-4"><div class="flex justify-between items-start mb-2"><h3 class="font-bold">${e.name}</h3><span class="${statusClass} text-xs px-2 py-1 rounded font-bold">${statusText}</span></div><p class="text-gray-500 text-xs mb-3 flex items-center gap-1"><span class="material-symbols-outlined text-xs">location_on</span>${e.location}</p><div class="flex items-center gap-2 mb-3"><span class="text-xs bg-surface-container px-2 py-1 rounded font-bold">${e.type || 'Equipment'}</span>${operatorBadge}</div><div class="flex justify-between items-center"><p class="font-bold text-lg" style="font-family:Montserrat">${price}/day</p><button class="${btnClass}" ${e.available ? 'onclick="showToast(\'Booking request sent!\')"' : ''}>${btnText}</button></div></div></div>`;
+    }).join('');
   }
 };
 
@@ -1472,6 +1599,37 @@ const Blog = {
       where: { author_id: authorId },
       orderBy: ['created_at', false]
     });
+  },
+
+  async render() {
+    const container = document.querySelector('#page-blog .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3');
+    if (!container) return;
+
+    const { data } = await DB.fetch(TABLES.BLOG_POSTS, {
+      where: { published: true },
+      orderBy: ['created_at', false],
+      limit: 9
+    });
+
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div class="col-span-3 text-center py-12 text-gray-400"><span class="material-symbols-outlined text-4xl">article</span><p class="mt-2">No blog posts yet</p></div>';
+      return;
+    }
+
+    const placeholderImages = [
+      'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop'
+    ];
+
+    container.innerHTML = data.map((b, i) => {
+      const img = b.cover_image || placeholderImages[i % placeholderImages.length];
+      const date = b.created_at ? new Date(b.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+      return `<div class="bg-white rounded-xl overflow-hidden premium-card-shadow border border-outline-variant btn-hover cursor-pointer"><div class="h-48"><img class="w-full h-full object-cover" src="${img}" alt="${b.title}"/></div><div class="p-4"><span class="text-xs font-bold text-secondary uppercase tracking-wider">${b.category || 'Article'}</span><h3 class="font-bold text-lg mt-1 mb-2" style="font-family:Montserrat">${b.title}</h3><p class="text-sm text-gray-500 line-clamp-2 mb-3">${b.excerpt || b.content || ''}</p><p class="text-xs text-gray-400">${date}</p></div></div>`;
+    }).join('');
   }
 };
 
@@ -1551,6 +1709,30 @@ const Dashboard = {
       .limit(limit);
 
     return { data, error };
+  },
+
+  async render() {
+    const { data: user } = await Auth.getUser();
+    if (!user) return;
+
+    // Update portfolio value
+    const { data: portfolioValue } = await this.getPortfolioValue();
+    const portfolioEl = document.querySelector('#page-dashboard .text-4xl, #page-dashboard .\.text-5xl');
+    if (portfolioEl && portfolioValue) {
+      portfolioEl.textContent = UI.formatCurrency(portfolioValue);
+    }
+
+    // Update transactions
+    const { data: txns } = await this.getRecentActivity(3);
+    const txnBody = document.querySelector('#page-dashboard tbody');
+    if (txnBody && txns && txns.length > 0) {
+      txnBody.innerHTML = txns.map(t => {
+        const date = new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const amount = UI.formatCurrency(Math.abs(t.amount));
+        const isPositive = t.type === 'refund' || t.type === 'commission';
+        return `<tr><td class="py-4 pr-4"><p class="font-bold">${t.reference_type || 'Transaction'}</p><p class="text-xs text-gray-500">${t.type || ''}</p></td><td class="py-4 px-4 text-gray-500">${date}</td><td class="py-4 pl-4 text-right font-bold ${isPositive ? 'text-secondary' : 'text-error'}">${isPositive ? '+' : '-'}${amount}</td></tr>`;
+      }).join('');
+    }
   }
 };
 
@@ -1630,6 +1812,31 @@ const Admin = {
       status,
       updated_at: new Date().toISOString()
     });
+  },
+
+  async render() {
+    // Update metrics from DB
+    const { data: metrics } = await this.getMetrics();
+    if (metrics) {
+      const cards = document.querySelectorAll('#page-admin .grid > div');
+      if (cards.length >= 4) {
+        if (metrics.totalUsers) cards[0].querySelector('.text-3xl').textContent = metrics.totalUsers.toLocaleString();
+        if (metrics.totalRevenue) cards[1].querySelector('.text-3xl').textContent = UI.formatCurrency(metrics.totalRevenue);
+        if (metrics.totalProperties) cards[2].querySelector('.text-3xl').textContent = metrics.totalProperties.toLocaleString();
+      }
+    }
+
+    // Update approvals queue
+    const { data: approvals } = await this.getPendingApprovals();
+    const queue = document.querySelector('#page-admin .space-y-3');
+    if (queue && approvals && approvals.length > 0) {
+      queue.innerHTML = approvals.map(p => {
+        const img = (p.images && p.images.length > 0) ? p.images[0] : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=80&h=80&fit=crop';
+        return `<div class="flex items-center gap-4 p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"><img class="w-12 h-12 rounded-lg object-cover" src="${img}" alt="Listing"/><div class="flex-1"><p class="text-white font-bold">${p.title}</p><p class="text-white/50 text-xs">Submitted ${new Date(p.created_at).toLocaleDateString()}</p></div><button class="bg-green-500 text-white px-4 py-2 rounded text-sm font-bold hover:bg-green-600" onclick="showToast('Listing approved!')">Approve</button><button class="bg-red-500/20 text-red-400 px-4 py-2 rounded text-sm font-bold hover:bg-red-500/30" onclick="showToast('Listing rejected')">Reject</button></div>`;
+      }).join('');
+    } else if (queue) {
+      queue.innerHTML = '<div class="text-center py-8 text-white/50"><p>No pending approvals</p></div>';
+    }
   }
 };
 

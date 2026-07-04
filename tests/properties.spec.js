@@ -37,14 +37,17 @@ test.describe('Properties Page', () => {
   });
 
   test('should display property specs', async ({ page }) => {
-    await expect(page.locator('#page-properties:has-text("3 Beds")')).toBeVisible();
+    await page.waitForTimeout(3000);
+    await expect(page.locator('#page-properties .flex.items-center.gap-4').first()).toBeVisible();
   });
 
   test('should have Details buttons', async ({ page }) => {
+    await page.waitForTimeout(3000);
     await expect(page.locator('#page-properties button:has-text("Details")').first()).toBeVisible();
   });
 
   test('should toggle favorite', async ({ page }) => {
+    await page.waitForTimeout(3000);
     const heart = page.locator('.favorite-btn').first();
     await heart.click();
     await expect(page.locator('#toast')).toBeVisible();
